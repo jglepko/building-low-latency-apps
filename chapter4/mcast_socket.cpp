@@ -31,7 +31,14 @@ namespace Common {
 
       logger_.log(%:% %() % send socket:% len:%\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_), socket_fd_, n);
     }
-
+    next_send_valid_index_ = 0;
     
+    return (n_rcv > 0);
+  }
+
+  auto McastSocket::send(const void *data, size_t len) noexcept -> void {
+    memcpy(outbound_data_.data() + next_send_valid_index_, data, len);
+    next_send_valid_index_ += len;
+    ASSERT(next_send_valid_index_ < McastBufferSize, "Mcast socket buffer filled up and sendAndRecv() not called.");
   }
 }
