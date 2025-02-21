@@ -16,8 +16,21 @@ namespace Common {
       inbound_data_.resize(TCPBufferSize);
     }
 
+    auto connect(const std::string &ip, const std::string &iface, int port, bool is_listening) -> int;
 
+    auto sendAndRecv() noexcept -> bool;
 
+    auto send(const void *data, size_t len) noexcept -> void;
+
+    TCPSocket() = delete;
+
+    TCPSocket(const TCPSocket &) = delete;
+
+    TCPSocket(const TCPSocket &&) = delete;
+
+    TCPSocket &operator=(const TCPSocket &) = delete;
+
+    TCPSocket &operator=(const TCPSocket &&) = delete;
 
     /// File descriptor for the socket.
     int socket_fd_ = -1;
