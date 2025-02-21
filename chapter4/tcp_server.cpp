@@ -42,4 +42,50 @@ namespace Common {
           have_new_connection = true;
           continue;
         }
-        logger_.log(
+        logger_.log(%:% %() % EPOLLIN socket:%\n", __FILE__, __LINE__, __FUNCTION__,
+                      Common::getCurrentTimeStr(&time_str_), socket->socket_fd_);
+        if (std::find(receive_sockets_.begin(), receive_sockets_.end(), socket) == receive_sockets_.end())
+          receive_sockets_.push_back(socket);
+      }
+
+      if (event.events & EPOLLOUT) {
+        logger_.log(%:% %() % EPOLLOUT socket:%\n", __FILE__, __LINE__, __FUNCTION__,
+                    Common::getCurrentTimeStr(&time_str_), socket->socket_fd_);
+        if (std::find(receive_sockets_.begin(), receive_sockets_.end(), socket) == receive_sockets_.end())
+          receive_sockets_.push_back(socket);
+      }
+
+      if (event.events & (EPOLLERR | EPOLLHUP)) {
+        logger_.log(%:% %() % EPOLLERR socket:%\n", __FILE__, __LINE__, __FUNCTION__,
+                    Common::getCurrentTimeStr(&time_str_), socket->socket_fd_);
+        if (std::find(receive_sockets_.begin(), receive_sockets_.end(), socket) == receive_sockets_.end())
+          receive_sockets_.push_back(socket);
+      }
+    }
+
+    // accept a new connection
+    while (have_new_connection) {
+        logger_.log(%:% %() % have_new_connection\n", __FILE__, __LINE__, __FUNCTION__,
+                    Common::getCurrentTimeStr(&time_str_));
+        sockaddr_storage addr;
+        socklen_t addr_len = sizeof(addr);
+        int fd = accept(listener_socket_.socket_fd_, reinterpret_cast<sockaddr *> (&addr), &addr_len);
+        if (fd == -1)
+          break;
+
+        ASSERT(setNonBlocking(fd) && disableNagle(fd),
+          "Failed to set non-blocking or no-delay on socket:" + std::to_string(fd));
+
+        logger_.log(%:% %() % accepted socket:%\n", __FILE__, __LINE__, __FUNCTION__,
+                    Common::getCurrentTimeStr(&time_str_), socket->socket_fd_);
+
+        auto socket = new TCPSocket(logger_);
+        socket->socket_fd_ = fd;
+        socket->recv_callback_ = recv_callback_;
+        ASSERT(addToEpollList(socket), "Unable to add socket. error:" + std::string(std::strerror(errno)));
+
+        if (std::find(receive_sockets_.begin(), receive_sockets_.end(), socket) == receive_sockets_.end())
+          receive_sockets_.push_back(socket);
+    }
+  }
+}
