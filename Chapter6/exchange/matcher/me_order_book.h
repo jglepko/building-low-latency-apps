@@ -187,4 +187,15 @@ namespace Exchange {
       } else {
         auto first_order = (orders_at_price ? orders_at_price->first_me_order_ : nullptr);
 
-        
+        first_order->prev_order_->next_order_ = order;
+        order->prev_order_ = first_order->prev_order_;
+        order->next_order_ = first_order;
+        first_order->prev_order_ = order;
+      }
+
+      cid_oid_to_order_at(order->client_id_).at(order->client_order_id_) = order;
+    }
+  };
+
+  typedef std::array<MEOrderBook *, ME_MAX_TICKERS> OrderBookHashMap;
+}
