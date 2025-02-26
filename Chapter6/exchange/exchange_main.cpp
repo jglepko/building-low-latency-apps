@@ -31,3 +31,13 @@ int main(int, char **) {
   std::string time_str;
 
   logger->log("%:% %() % Starting Matching Engine...\n", __FILE__, __LINE__, __FUNCTION__, 
+              Common::getCurrentTimeStr(&time_str));
+  matching_engine = new Exchange::MatchingEngine(&client_requests, &client_responses, &market_updates);
+  matching_engine->start();
+
+  while (true) {
+    logger->log("%:% %() % Sleeping for a few milliseconds...\n", __FILE__, __LINE__, __FUNCTION__, 
+              Common::getCurrentTimeStr(&time_str));
+              usleep(sleep_time * 1000);
+  }
+}
