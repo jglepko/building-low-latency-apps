@@ -9,4 +9,18 @@ namespace Exchange {
     }
 
   MEOrderBook::~MEOrderBook() {
-    
+    logger_->log("%:% %() % OrderBook\n%\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_),
+      toString(false, true));
+
+    matching_engine_ = nullptr;
+    bids_by_price_ = asks_by_price_ = nullptr;
+    for (auto& itr : cid_oid_to_order_) {
+      itr.fill(nullptr);
+    }
+  }
+
+  auto MEOrderBook::match(TickerId ticker_id, ClientId client_id, Side side, OrderId client_order_id, OrderId new_market_order_id,
+                          MEOrder* itr, Qty* leaves_qty) noexcept {
+
+
+  }
