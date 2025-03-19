@@ -56,6 +56,13 @@ namespace Trading {
     QueuedMarketUpdates snapshot_queued_msgs_, incremental_queued_msgs_;
 
   private:
-    
+    auto run() noexcept -> void;
+
+    auto recvCallback(McastSocket *socket) noexcept -> void;
+
+    auto queueMessage(bool is_snapshot, const Exchange::MDPMarketUpdate *request);
+
+    auto startSnapshotSync() -> void;
+    auto checkSnapshotSync() -> void;
   };
 }
