@@ -61,4 +61,19 @@ namespace Trading {
     for (auto &snapshot_itr: snapshot_queued_msgs_) {
       logger_.log("%:% %() % % => %\n", __FILE__, __LINE__, __FUNCTION__, 
                   Common::getCurrentTimeStr(&time_str_), snapshot_itr.first, snapshot_itr.second.toString());
+      if (snapshot_itr.first != next_snapshot_seq) {
+        have_complete_snapshot = false;
+        logger_.log("%:% %() % Detected gap in snapshot stream expected:% found:% %.\n", __FILE__, __LINE__, __FUNCTION__, 
+                  Common::getCurrentTimeStr(&time_str_), next_snapshot_seq, snapshot_itr.first,
+                  snapshot_itr.second.toString());
+        break;
+      }
+
+      if (snapshot_itr.second.type_ != Exchange::MarketUpdateType::SNAPSHOT_START &&
+          snapshot_itr.second.type_ != Exchange::MarketUpdateType::SNAPSHOT_END)
+        final_events.push_back(snapshot_itr.second);
+
+      ++next_snapshot_seq;
   }
+
+  const auto &last_snapshot_msg = 
