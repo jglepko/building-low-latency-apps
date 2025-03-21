@@ -76,4 +76,39 @@ namespace Trading {
       ++next_snapshot_seq;
   }
 
-  const auto &last_snapshot_msg = 
+  if (!have_complete_snapshot) {
+        logger_.log("%:% %() % Returning because found gaps in snapshot stream.\n", 
+                    __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_));
+        snapshot_queued_msgs_.clear();
+        return;
+  }
+
+  const auto &last_snapshot_msg = snapshot_queued_msgs_.rbegin()->second;
+  if (last_snapshot_msg.type_ != Exchange::MarketUpdateType::SNAPSHOT_END) {
+    logger_.log("%:% %() % Returning because have not seen a SNAPSHOT_END yet.\n", 
+                __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_));
+    return;
+  }
+
+  auto have_complete_incremental = true;
+  size_t num_incrementals = 0;
+  next_exp_inc_seq_num_ = last_snapshot_msg.order_id_ + 1;
+  for (auto inc_itr = incremental_queued_msgs_.begin(): inc_itr != incremental_queued_msgs_.end(); ++inc_itr) {
+    logger_.log("%:% %() % Checking next_exp:% vs. seq:% %.\n", __FILE__, __LINE__, __FUNCTION__, 
+                Common::getCurrentTimeStr(&time_str_), next_exp_inc_seq_num_, inc_itr->first, inc_itr->second.toString());
+
+  if (inc_itr->first < next_exp_inc_seq_num_) 
+    continue;
+
+  if (inc_itr->first != next_exp_inc_seq_num_) {
+    logger_.log("%:% %() % Detected gap in incremental stream expected:% found:% %.\n", __FILE__, __LINE__, __FUNCTION__, 
+                Common::getCurrentTimeStr(&time_str_), next_exp_inc_seq_num_, inc_itr->first, inc_itr->second.toString());
+    have_complete_incremental = false;
+    break;
+  }
+
+  logger_.log("%:% %() % Checking next_exp:% vs. seq:% %.\n", __FILE__, __LINE__, __FUNCTION__, 
+                Common::getCurrentTimeStr(&time_str_), next_exp_inc_seq_num_, inc_itr->first, inc_itr->second.toString());
+
+    
+  
