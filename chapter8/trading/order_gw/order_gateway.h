@@ -61,5 +61,14 @@ namespace Trading {
     std::string time_str_;
     Logger logger_;
 
-    
+    size_t next_outgoing_seq_num_ = 1;
+    size_t next_exp_seq_num_ = 1;
+    Common::TCPSocket tcp_socket_;
+
+  private:
+    auto run() noexcept -> void;
+
+    auto recvCallback(TCPSocket *socket, Nanos rx_time) noexcept -> void;
+  };
+}
     
