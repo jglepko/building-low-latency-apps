@@ -140,4 +140,48 @@ namespace Common {
 
   inline auto stringToAlgoType(const std::string &str) -> AlgoType {
     for (auto i = static_cast<int>(AlgoType::INVALID); i <= static_cast<int>(AlgoType::MAX); ++i) {
-      
+      const auto algo_type = static_cast<AlgoType>(i);
+      if (algoTypeToString(algo_type) == str)
+        return algo_type;
+    }
+
+    return AlgoType::INVALID;
+  }
+
+  struct RiskCfg {
+    Qty max_order_size_ = 0;
+    Qty max_position_ = 0;
+    double max_loss_ = 0;
+
+    auto toString() const {
+      std::stringstream ss;
+
+      ss << "RiskCfg{"
+         << "max-order-size:" << qtyToString(max_order_size_) << " "
+         << "max-position:" << qtyToString(max_position_) << " "
+         << "max-loss:" << max_loss_
+         << "}";
+
+      return ss.str();
+    }
+  };
+
+  struct TradeEngineCfg {
+    Qty clip_ = 0;
+    double threshold_ = 0;
+    RiskCfg risk_cfg_;
+
+    auto toString() const {
+      std::stringstream ss;
+      ss << "TradeEngineCfg{"
+         << "clip:" << qtyToString(clip_) << " "
+         << "thresh:" << threshold_ << " "
+         << "risk:" << risk_cfg_.toString()
+         << "}";
+
+      return ss.str();
+    }
+  };
+
+  typedef std::array<TradeEngineCfg, ME_MAX_TICKERS> TradeEngineCfgHashMap;
+}
