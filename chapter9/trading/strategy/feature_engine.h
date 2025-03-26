@@ -43,3 +43,21 @@ namespace Trading {
     auto getAggTradeQtyRatio() const noexcept {
       return agg_trade_qty_ratio_;
     }
+
+    FeatureEngine() = delete;
+
+    FeatureEngine(const FeatureEngine &) = delete;
+
+    FeatureEngine(const FeatureEngine &&) = delete;
+
+    FeatureEngine &operator=(const FeatureEngine &) = delete;
+
+    FeatureEngine &operator=(const FeatureEngine &&) = delete;
+
+  private:
+    std::string time_str_;
+    Common::Logger *logger_ = nullptr;
+
+    double mkt_price_ = Feature_INVALID, agg_trade_qty_ratio_ = Feature_INVALID;
+  };
+}
